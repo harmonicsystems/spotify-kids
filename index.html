@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Cards</title>
+<meta name="description" content="A simple music jukebox for young listeners">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --paper:   #FAF6EB;
+    --paper-2: #F2EDDC;
+    --paper-3: #E8E1CB;
+    --ink:     #2A2418;
+    --ink-2:   #6B5E47;
+    --ink-3:   #9A8E76;
+    --rule:    #E0D8C2;
+    --shadow:  rgba(42, 36, 24, 0.08);
+    --shadow-h:rgba(42, 36, 24, 0.16);
+
+    --c1: #E27D60;
+    --c2: #6B9080;
+    --c3: #E8B647;
+    --c4: #9C6FE4;
+    --c5: #4FB3AB;
+    --c6: #E76F8E;
+    --c7: #5DA9E9;
+    --c8: #D58A5E;
+
+    --serif: 'Newsreader', Georgia, serif;
+    --mono:  'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:   #1E1A12;
+      --paper-2: #28231A;
+      --paper-3: #322D22;
+      --ink:     #F2EDDC;
+      --ink-2:   #C4BCA4;
+      --ink-3:   #8A8270;
+      --rule:    #3A3424;
+      --shadow:  rgba(0, 0, 0, 0.3);
+      --shadow-h:rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    min-height: 100vh;
+    padding: 32px 24px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main { max-width: 1100px; margin: 0 auto; }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(36px, 6vw, 56px);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    font-variation-settings: "opsz" 72;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-2);
+    font-variation-settings: "opsz" 72;
+  }
+
+  /* ============ Now Playing ============ */
+  #now-playing-wrap {
+    background: var(--paper-2);
+    border-radius: 28px;
+    padding: 20px;
+    margin-bottom: 48px;
+    min-height: 192px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+  #now-playing-wrap.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-2);
+    font-style: italic;
+    font-size: clamp(18px, 2.5vw, 24px);
+    text-align: center;
+  }
+
+  .np-row {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+  .np-card {
+    width: 152px;
+    height: 152px;
+    border-radius: 20px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--np-card-color, var(--paper-3));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  }
+  .np-card-fallback {
+    color: rgba(255, 255, 255, 0.95);
+    font-family: var(--serif);
+    font-size: 72px;
+    font-weight: 500;
+    font-style: italic;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    font-variation-settings: "opsz" 72;
+  }
+  .np-row iframe {
+    flex: 1;
+    border-radius: 20px;
+    height: 152px;
+    border: 0;
+    background: var(--paper-3);
+    min-width: 0;
+  }
+
+  @media (max-width: 720px) {
+    .np-row {
+      flex-wrap: wrap;
+    }
+    .np-card {
+      width: 100%;
+      height: 200px;
+    }
+    .np-row iframe {
+      width: 100%;
+      flex: 1 1 auto;
+    }
+  }
+
+  .stop-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    border-radius: 20px;
+    width: 116px;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s ease, background 0.15s;
+    flex-shrink: 0;
+  }
+  .stop-btn:hover { background: var(--ink-2); }
+  .stop-btn:active { transform: scale(0.95); }
+  .stop-icon {
+    width: 24px;
+    height: 24px;
+    background: var(--paper);
+    border-radius: 4px;
+  }
+
+  /* ============ Card grid ============ */
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 880px) {
+    #grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  }
+
+  .card {
+    background: var(--paper);
+    border: 0;
+    border-radius: 24px;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 3px 10px var(--shadow);
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px var(--shadow-h);
+  }
+  .card:active { transform: scale(0.97); }
+  .card.playing {
+    outline: 4px solid var(--ink);
+    outline-offset: 4px;
+  }
+
+  .card-art {
+    aspect-ratio: 1 / 1;
+    background-color: var(--card-color);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--serif);
+    font-size: 72px;
+    font-weight: 500;
+    font-style: italic;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    position: relative;
+  }
+
+  .card-art.has-image {
+    color: transparent;
+    text-shadow: none;
+  }
+
+  .card-meta {
+    padding: 14px 16px;
+    background: var(--paper);
+    border-top: 0.5px solid var(--rule);
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ink);
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 2.6em;
+  }
+  .card-type {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+  }
+
+  /* ============ Footer note ============ */
+  footer {
+    margin-top: 56px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+  }
+  footer a {
+    color: var(--ink-2);
+    text-decoration: none;
+    border-bottom: 0.5px solid var(--rule);
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Pick a <em>card</em></h1>
+  </header>
+
+  <div id="now-playing-wrap" class="empty">
+    <p>Tap any card to play music</p>
+  </div>
+
+  <div id="grid"></div>
+
+  <footer>
+    <p>A music jukebox · <a href="https://github.com/harmonicsystems">harmonic systems</a></p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  // ============ Card configuration ============
+  // To add or change cards: edit this array. Each card needs a Spotify URL.
+  // The accent color is shown until the cover art loads from Spotify.
+  const CARDS = [
+    { url: 'https://open.spotify.com/playlist/2H5WIi9pNC5aM8fP9XWBxf', accent: 'var(--c1)' },
+    { url: 'https://open.spotify.com/album/7yPJu92ht3NA8pKKI6D8TE',    accent: 'var(--c2)' },
+    { url: 'https://open.spotify.com/album/2CNEkSE8TADXRT2AzcEt1b',    accent: 'var(--c3)' },
+    { url: 'https://open.spotify.com/album/3usnShwygMXVZB4IV5dwnU',    accent: 'var(--c4)' },
+    { url: 'https://open.spotify.com/album/2fxQs4i9HfyRME7zjp0ZnB',    accent: 'var(--c5)' },
+    { url: 'https://open.spotify.com/album/1mcbcxox0vOHK5bjCaa9xp',    accent: 'var(--c6)' },
+    { url: 'https://open.spotify.com/playlist/14C5iEKg3K4Dj6AFkB5sJ9', accent: 'var(--c7)' },
+    { url: 'https://open.spotify.com/playlist/637DehzVYKHDDz3AEh6iwa', accent: 'var(--c8)' },
+  ];
+
+  // ============ URL parsing ============
+  function parseSpotifyUrl(url) {
+    const m = url.match(/open\.spotify\.com\/(?:intl-\w+\/)?(track|album|playlist|artist|episode)\/([a-zA-Z0-9]+)/);
+    return m ? { type: m[1], id: m[2] } : null;
+  }
+
+  function embedUrl(type, id) {
+    return 'https://open.spotify.com/embed/' + type + '/' + id + '?utm_source=jukebox';
+  }
+
+  // ============ Render cards ============
+  const grid = document.getElementById('grid');
+  const npw = document.getElementById('now-playing-wrap');
+
+  CARDS.forEach((card, i) => {
+    const parsed = parseSpotifyUrl(card.url);
+    if (!parsed) return;
+    card.type = parsed.type;
+    card.id = parsed.id;
+    card.index = i;
+
+    const btn = document.createElement('button');
+    btn.className = 'card';
+    btn.style.setProperty('--card-color', card.accent);
+    btn.dataset.idx = i;
+
+    const fallbackLabel = card.type === 'playlist' ? 'Playlist' : 'Album';
+
+    btn.innerHTML =
+      '<div class="card-art" data-art="' + i + '">' + (i + 1) + '</div>' +
+      '<div class="card-meta">' +
+        '<div class="card-title" data-title="' + i + '">' + fallbackLabel + '</div>' +
+        '<div class="card-type">' + card.type + '</div>' +
+      '</div>';
+
+    btn.addEventListener('click', () => play(card, btn));
+    card.element = btn;
+    grid.appendChild(btn);
+  });
+
+  // ============ Play / Stop ============
+  function play(card, btn) {
+    document.querySelectorAll('.card.playing').forEach(el => el.classList.remove('playing'));
+    btn.classList.add('playing');
+
+    npw.classList.remove('empty');
+
+    const hasArt = !!card.thumbnailUrl;
+    const npCardStyle = hasArt
+      ? 'background-image: url(' + card.thumbnailUrl + ');'
+      : '--np-card-color: ' + card.accent + ';';
+    const fallback = hasArt
+      ? ''
+      : '<span class="np-card-fallback">' + (card.index + 1) + '</span>';
+
+    npw.innerHTML =
+      '<div class="np-row">' +
+        '<div class="np-card" style="' + npCardStyle + '">' + fallback + '</div>' +
+        '<iframe src="' + embedUrl(card.type, card.id) + '" ' +
+                'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" ' +
+                'loading="eager"></iframe>' +
+        '<button class="stop-btn" id="stop-btn" aria-label="Stop playback">' +
+          '<div class="stop-icon" aria-hidden="true"></div>' +
+          '<span>Stop</span>' +
+        '</button>' +
+      '</div>';
+
+    document.getElementById('stop-btn').addEventListener('click', stopPlayback);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function stopPlayback() {
+    document.querySelectorAll('.card.playing').forEach(el => el.classList.remove('playing'));
+    npw.classList.add('empty');
+    npw.innerHTML = '<p>Tap any card to play music</p>';
+  }
+
+  // ============ Metadata loading via oEmbed ============
+  // Tries to fetch real title and cover art for each card. If Spotify's oEmbed
+  // endpoint blocks CORS or fails, the numbered colored fallback stays.
+  async function loadMetadata() {
+    for (const card of CARDS) {
+      if (!card.type || !card.id) continue;
+      try {
+        const oembedUrl = 'https://open.spotify.com/oembed?url=' + encodeURIComponent(card.url);
+        const res = await fetch(oembedUrl);
+        if (!res.ok) continue;
+        const data = await res.json();
+
+        const artEl = document.querySelector('[data-art="' + card.index + '"]');
+        const titleEl = document.querySelector('[data-title="' + card.index + '"]');
+
+        if (data.thumbnail_url && artEl) {
+          card.thumbnailUrl = data.thumbnail_url;
+          // Preload image so we don't flash a broken state
+          const img = new Image();
+          img.onload = () => {
+            artEl.style.backgroundImage = 'url(' + data.thumbnail_url + ')';
+            artEl.classList.add('has-image');
+          };
+          img.src = data.thumbnail_url;
+        }
+        if (data.title && titleEl) {
+          card.title = data.title;
+          titleEl.textContent = data.title;
+        }
+      } catch (e) {
+        // Card keeps its fallback visual
+      }
+    }
+  }
+
+  loadMetadata();
+})();
+</script>
+</body>
+</html>

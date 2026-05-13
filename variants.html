@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotify Kids · Design Variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --paper: #FAF6EB;
+    --paper-2: #F2EDDC;
+    --ink:  #2A2418;
+    --ink-2: #6B5E47;
+    --ink-3: #9A8E76;
+    --rule: #E0D8C2;
+    --serif: 'Newsreader', Georgia, serif;
+    --mono:  'JetBrains Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #1E1A12; --paper-2: #28231A; --ink: #F2EDDC; --ink-2: #C4BCA4; --ink-3: #8A8270; --rule: #3A3424; }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 36px; }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 48px);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  h1 em { font-style: italic; font-weight: 400; color: var(--ink-2); }
+  .lede {
+    margin-top: 10px;
+    color: var(--ink-2);
+    font-size: 17px;
+    line-height: 1.5;
+    max-width: 56ch;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 18px 20px;
+    background: var(--paper-2);
+    border-radius: 18px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .row:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(42,36,24,0.08); }
+
+  .badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 32px;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .meta { min-width: 0; }
+  .name {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .desc {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.4;
+  }
+  .file {
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+  }
+  .arrow {
+    color: var(--ink-3);
+    font-size: 24px;
+  }
+
+  footer {
+    margin-top: 48px;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Design <em>variants</em></h1>
+    <p class="lede">Five takes on a tiny-finger-friendly Spotify jukebox. Same eight URLs, very different vibes. Pick the one that feels right and we'll refine.</p>
+  </header>
+
+  <div class="list">
+    <a class="row" href="index.html">
+      <div class="badge" style="background: #E27D60;">A</div>
+      <div class="meta">
+        <div class="name">Paper Cards <span style="font-style: italic; color: var(--ink-3); font-size: 14px;">— original</span></div>
+        <div class="desc">Warm cream paper, 4-column grid, serif type. Album cover hero with embed below.</div>
+        <div class="file">index.html</div>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="row" href="index-buttons.html">
+      <div class="badge" style="background: #4FB3AB;">B</div>
+      <div class="meta">
+        <div class="name">Kiosk Buttons</div>
+        <div class="desc">No header, no chrome. 8 huge tactile tiles fill the screen. Fullscreen player overlay with one big Stop button.</div>
+        <div class="file">index-buttons.html</div>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="row" href="index-cassettes.html">
+      <div class="badge" style="background: #8B5A2B;">C</div>
+      <div class="meta">
+        <div class="name">Tape Deck</div>
+        <div class="desc">Wood-grain shelf of cassette tapes. Spools spin when playing. Eject button stops the music.</div>
+        <div class="file">index-cassettes.html</div>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="row" href="index-friends.html">
+      <div class="badge" style="background: #E76F8E;">D</div>
+      <div class="meta">
+        <div class="name">Music Friends</div>
+        <div class="desc">Wobbly blob creatures with eyes, blush, and a smile. Cover art lives in each one's belly. Named characters, not numbers.</div>
+        <div class="file">index-friends.html</div>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="row" href="index-coverflow.html">
+      <div class="badge" style="background: #14110d; color: #f0eadd;">E</div>
+      <div class="meta">
+        <div class="name">Gallery</div>
+        <div class="desc">Single huge cover, art-museum darkness, colored spotlight behind it. Swipe / arrow keys to browse. Player drawer slides up.</div>
+        <div class="file">index-coverflow.html</div>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+  </div>
+
+  <footer>A jukebox for a tiny human · five sketches</footer>
+</main>
+</body>
+</html>

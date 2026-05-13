@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Music · Buttons</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    background: #14110c;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", system-ui, sans-serif;
+    overflow: hidden;
+    height: 100dvh;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
+    height: 100dvh;
+    width: 100vw;
+  }
+  @media (orientation: landscape) {
+    #grid { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+  }
+
+  .tile {
+    border: 0;
+    border-radius: 28px;
+    background-color: var(--c);
+    background-size: cover;
+    background-position: center;
+    color: white;
+    font-family: inherit;
+    font-weight: 900;
+    font-size: clamp(56px, 12vw, 120px);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+    text-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.18));
+    pointer-events: none;
+  }
+  .tile:active {
+    transform: translateY(4px) scale(0.97);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .tile.has-art { color: transparent; text-shadow: none; }
+  .tile.has-art::after { background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.25)); }
+
+  /* Player overlay */
+  #player {
+    position: fixed;
+    inset: 0;
+    background: #0a0805;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+  }
+  #player.active { display: flex; }
+  #player iframe {
+    flex: 1;
+    border: 0;
+    border-radius: 24px;
+    width: 100%;
+    min-height: 0;
+    background: #1a1612;
+  }
+  #stop {
+    border: 0;
+    border-radius: 28px;
+    background: #fff;
+    color: #14110c;
+    font-family: inherit;
+    font-weight: 900;
+    font-size: clamp(28px, 5vw, 40px);
+    padding: 24px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    transition: transform 0.08s ease;
+  }
+  #stop:active { transform: scale(0.96); }
+  #stop svg { width: 36px; height: 36px; }
+</style>
+</head>
+<body>
+<div id="grid"></div>
+
+<div id="player" role="dialog" aria-label="Music player">
+  <iframe id="player-iframe" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="eager"></iframe>
+  <button id="stop" aria-label="Stop">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    Stop
+  </button>
+</div>
+
+<script>
+(function(){
+  const CARDS = [
+    { url: 'https://open.spotify.com/playlist/2H5WIi9pNC5aM8fP9XWBxf', accent: '#E27D60' },
+    { url: 'https://open.spotify.com/album/7yPJu92ht3NA8pKKI6D8TE',    accent: '#6B9080' },
+    { url: 'https://open.spotify.com/album/2CNEkSE8TADXRT2AzcEt1b',    accent: '#E8B647' },
+    { url: 'https://open.spotify.com/album/3usnShwygMXVZB4IV5dwnU',    accent: '#9C6FE4' },
+    { url: 'https://open.spotify.com/album/2fxQs4i9HfyRME7zjp0ZnB',    accent: '#4FB3AB' },
+    { url: 'https://open.spotify.com/album/1mcbcxox0vOHK5bjCaa9xp',    accent: '#E76F8E' },
+    { url: 'https://open.spotify.com/playlist/14C5iEKg3K4Dj6AFkB5sJ9', accent: '#5DA9E9' },
+    { url: 'https://open.spotify.com/playlist/637DehzVYKHDDz3AEh6iwa', accent: '#D58A5E' },
+  ];
+
+  function parse(url) {
+    const m = url.match(/open\.spotify\.com\/(?:intl-\w+\/)?(track|album|playlist|artist|episode)\/([a-zA-Z0-9]+)/);
+    return m ? { type: m[1], id: m[2] } : null;
+  }
+  const embed = (t, id) => 'https://open.spotify.com/embed/' + t + '/' + id + '?utm_source=jukebox-buttons';
+
+  const grid = document.getElementById('grid');
+  const player = document.getElementById('player');
+  const iframe = document.getElementById('player-iframe');
+
+  CARDS.forEach((card, i) => {
+    const p = parse(card.url);
+    if (!p) return;
+    card.type = p.type; card.id = p.id; card.index = i;
+
+    const btn = document.createElement('button');
+    btn.className = 'tile';
+    btn.style.setProperty('--c', card.accent);
+    btn.dataset.idx = i;
+    btn.textContent = (i + 1);
+    btn.setAttribute('aria-label', 'Card ' + (i + 1));
+    btn.addEventListener('click', () => play(card));
+    card.element = btn;
+    grid.appendChild(btn);
+  });
+
+  function play(card) {
+    iframe.src = embed(card.type, card.id);
+    player.classList.add('active');
+  }
+  document.getElementById('stop').addEventListener('click', () => {
+    iframe.src = 'about:blank';
+    player.classList.remove('active');
+  });
+
+  async function loadMeta() {
+    for (const card of CARDS) {
+      try {
+        const r = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(card.url));
+        if (!r.ok) continue;
+        const d = await r.json();
+        if (d.thumbnail_url && card.element) {
+          const img = new Image();
+          img.onload = () => {
+            card.element.style.backgroundImage = 'url(' + d.thumbnail_url + ')';
+            card.element.classList.add('has-art');
+          };
+          img.src = d.thumbnail_url;
+        }
+      } catch (e) {}
+    }
+  }
+  loadMeta();
+})();
+</script>
+</body>
+</html>
